@@ -1,18 +1,25 @@
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends
 import tekore as tk
 
-class OAuthInitiatedResponse(BaseModel):
-    # auth url from spotify to redirect for oauth
-    spotify_url:str
+def get_user_auth_instance(state=None):
+    scope = tk.scope.read + tk.scope.write
+    creds = tk.Credentials(*tk.config_from_environment())
+    auth = tk.UserAuth(creds, scope)
+    if state:
+        auth.state = state
+    return auth
 
 router = APIRouter()
-conf = tk.config_from_environment()
-CREDS = tk.Credentials(*conf)
 
-@router.get('/auth', response_model=OAuthInitiatedResponse)
+@router.get('/auth')
 def initiate_oauth():
-    scope = tk.scope.read + tk.scope.write
-    auth = tk.UserAuth(CREDS, scope)
-    # frontend will receive tokens in callback
-    return {'spotify_url':auth.url}
+    # get redirect url for oauth - frontend stores state in session
+    auth = get_user_auth_instance()
+    return {'spotify_url':auth.url, 'state':auth.state}
+
+@router.post('/auth/callback')
+def complete_oauth(code:str, state:str):
+    # complete oauth with spotify code + state from user session
+    auth = get_user_auth_instance(state)
+    token = auth.request_token(code, state)
+    return {'token':token}
