@@ -21,7 +21,7 @@ export default {
         const path = `${process.env.VUE_APP_API_URL}/auth/callback?state=${state}&code=${code}`
         // use get request because get is cheaper than post on s3
         await axios.get(path).then((res) => {
-          this.$cookie.set('spotify_token', res.data.token);
+          this.$cookie.set('spotify_token', JSON.stringify(res.data.token));
         });
         this.$router.push({name: 'Main'});
       }

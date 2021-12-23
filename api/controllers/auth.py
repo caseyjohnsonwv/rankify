@@ -22,4 +22,4 @@ def complete_oauth(code:str, state:str):
     # complete oauth with spotify code + state from user session
     auth = get_user_auth_instance(state)
     token = auth.request_token(code, state)
-    return {'token':token}
+    return {'token':token.__dict__}

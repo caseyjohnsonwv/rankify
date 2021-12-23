@@ -1,10 +1,11 @@
 import uvicorn, env
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from controllers import auth
+from controllers import auth, spotify
 
 app = FastAPI()
 app.include_router(auth.router)
+app.include_router(spotify.router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
