@@ -1,7 +1,9 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import VueSession from 'vue-session'
 
 Vue.use(VueRouter)
+Vue.use(VueSession)
 
 const routes = [
   {
