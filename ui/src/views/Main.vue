@@ -6,6 +6,15 @@
 
 <script>
 export default {
-  name: 'Main'
+  name: 'Main',
+  methods: {
+
+  },
+  created() {
+    const token = this.$cookie.get('spotify_token')
+    if (token === null) {
+      this.$router.push({name: 'Landing'});
+    }
+  }
 }
 </script>

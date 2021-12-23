@@ -1,9 +1,11 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import VueSession from 'vue-session'
+import VueCookie from 'vue-cookie'
 
 Vue.use(VueRouter)
 Vue.use(VueSession)
+Vue.use(VueCookie)
 
 const routes = [
   {
