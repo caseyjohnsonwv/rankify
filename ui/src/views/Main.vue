@@ -13,13 +13,11 @@ export default {
   methods: {
     test: async function() {
       let token = JSON.parse(this.$cookie.get('spotify_token'));
-      let query = 'Mac Miller';
-      const path = encodeURI(`${process.env.VUE_APP_API_URL}/spotify/search?query=${query}`);
+      let query = 'Mac Miller Swimming';
+      let type = 'album';
+      const path = encodeURI(`${process.env.VUE_APP_API_URL}/spotify/import?type=${type}&query=${query}`);
       await axios.post(path, {token}).then((res) => {
         console.log(res);
-        var names = []
-        res.data.results[0].items.forEach(item => names.push(item.name));
-        alert(names);
       });
     }
   },
