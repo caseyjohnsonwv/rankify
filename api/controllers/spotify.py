@@ -31,8 +31,11 @@ def build_token(token):
 @router.post('/spotify/import', response_model=ImportResponse)
 def importMedia(token:dict, type:str, query:str):
     # allow users to import individual tracks or entire albums
-    client = tk.Spotify(build_token(token))
-    results = client.search(query, types=(type,), limit=1)
+    try:
+        client = tk.Spotify(build_token(token))
+        results = client.search(query, types=(type,), limit=1)
+    except TypeError or KeyError or tk.Unauthorized:
+        raise HTTPException(status_code=401, detail="Not authorized")
     resource = results[0] if len(results) > 0 else None
     if resource is None:
         raise HTTPException(status_code=404, detail=f"Media not found for search query {query}")
