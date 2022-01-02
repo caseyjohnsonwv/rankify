@@ -6,27 +6,33 @@
       <div class="row">
         <div class="col">
           <h3>Unranked Songs</h3>
-          <draggable v-model="unranked_songs" group="songs" @start="drag=true" @end="drag=false">
-            <Song v-for="song in unranked_songs"
+          <draggable v-model="unranked_songs" group="songs">
+            <Song
+            v-for="song in unranked_songs"
               :key="song.uri"
               :name="song.name"
               :artist="song.artist"
               :album_cover="song.album_cover"
+              :album_name="song.album_name"
               :preview_url="song.preview_url"
               :uri="song.uri"
+            v-on:click.native="play_preview(song.preview_url)"
             ></Song>
           </draggable>
         </div>
         <div class="col">
           <h3>Ranked Songs</h3>
-          <draggable v-model="ranked_songs" group="songs" @start="drag=true" @end="drag=true">
-            <Song v-for="song in ranked_songs"
+          <draggable v-model="ranked_songs" group="songs">
+            <Song
+            v-for="song in ranked_songs"
               :key="song.uri"
               :name="song.name"
               :artist="song.artist"
               :album_cover="song.album_cover"
+              :album_name="song.album_name"
               :preview_url="song.preview_url"
               :uri="song.uri"
+            v-on:click.native="play_preview(song.preview_url)"
             ></Song>
           </draggable>
         </div>
@@ -51,12 +57,36 @@ export default {
       all_songs: new Set(),
       unranked_songs: [],
       ranked_songs: [],
+      now_playing: null,
     };
   },
   methods: {
+    play_preview: function(preview_url) {
+      if (this.now_playing === null) {
+        // first time playback
+        this.now_playing = new Audio(preview_url);
+        this.now_playing.play();
+      } else {
+        if (this.now_playing.src === preview_url) {
+          if (this.now_playing.paused || this.now_playing.ended) {
+            // resume or replay
+            this.now_playing.play();
+          } else {
+            // pause
+            this.now_playing.pause();
+          }
+        }
+        else {
+          // song change
+          this.now_playing.pause();
+          this.now_playing = new Audio(preview_url);
+          this.now_playing.play();
+        }
+      }
+    },
     test: async function() {
       let token = JSON.parse(this.$cookie.get('spotify_token'));
-      let query = 'Mac Miller Swimming';
+      let query = 'Mac Miller Faces';
       let type = 'album';
       const path = encodeURI(`${process.env.VUE_APP_API_URL}/spotify/import?type=${type}&query=${query}`);
       await axios.post(path, {token})
@@ -71,6 +101,7 @@ export default {
               'artist':res.data.artist,
               'preview_url':track.preview_url,
               'album_cover':res.data.image_url,
+              'album_name':res.data.album,
             });
           }
         });
@@ -79,6 +110,7 @@ export default {
         console.error(err.toJSON());
         if (err.response.status == 401) {
           alert("Session has expired, please log in again!")
+          this.$cookie.delete('spotify_token');
           this.$router.push({name: 'Landing'});
         }
       });

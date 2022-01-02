@@ -34,7 +34,7 @@ def importMedia(token:dict, type:str, query:str):
     try:
         client = tk.Spotify(build_token(token))
         results = client.search(query, types=(type,), limit=1)
-    except TypeError or KeyError or tk.Unauthorized:
+    except Exception:
         raise HTTPException(status_code=401, detail="Not authorized")
     resource = results[0] if len(results) > 0 else None
     if resource is None:
