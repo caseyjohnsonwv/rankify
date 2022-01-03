@@ -7,7 +7,7 @@
         <div class="col">
           <h3>Unranked Songs</h3>
           <draggable v-model="unranked_songs" group="songs">
-            <Song
+            <Song :ref="song.preview_url"
             v-for="song in unranked_songs"
               :key="song.uri"
               :name="song.name"
@@ -16,14 +16,14 @@
               :album_name="song.album_name"
               :preview_url="song.preview_url"
               :uri="song.uri"
-            v-on:click.native="play_preview(song.preview_url)"
+            v-on:click.native="play_preview(song.preview_url);"
             ></Song>
           </draggable>
         </div>
         <div class="col">
           <h3>Ranked Songs</h3>
           <draggable v-model="ranked_songs" group="songs">
-            <Song
+            <Song :ref="song.preview_url"
             v-for="song in ranked_songs"
               :key="song.uri"
               :name="song.name"
@@ -62,31 +62,37 @@ export default {
   },
   methods: {
     play_preview: function(preview_url) {
+      // find old and new songs to toggle playing
       if (this.now_playing === null) {
         // first time playback
         this.now_playing = new Audio(preview_url);
         this.now_playing.play();
+        this.$refs[this.now_playing.src][0].active = true;
       } else {
         if (this.now_playing.src === preview_url) {
           if (this.now_playing.paused || this.now_playing.ended) {
             // resume or replay
             this.now_playing.play();
+            this.$refs[this.now_playing.src][0].active = true;
           } else {
             // pause
             this.now_playing.pause();
+            this.$refs[this.now_playing.src][0].active = false;
           }
         }
         else {
           // song change
+          this.$refs[this.now_playing.src][0].active = false;
           this.now_playing.pause();
           this.now_playing = new Audio(preview_url);
           this.now_playing.play();
+          this.$refs[this.now_playing.src][0].active = true;
         }
       }
     },
     test: async function() {
       let token = JSON.parse(this.$cookie.get('spotify_token'));
-      let query = 'Mac Miller Faces';
+      let query = 'Tyler Childers';
       let type = 'album';
       const path = encodeURI(`${process.env.VUE_APP_API_URL}/spotify/import?type=${type}&query=${query}`);
       await axios.post(path, {token})

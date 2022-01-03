@@ -11,7 +11,6 @@
         </div>
         <div class="col-3">
           <p class="no-margin-bottom">{{artist}}</p>
-          <p class="no-margin-bottom">{{album_name}}</p>
         </div>
       </div>
     </div>
@@ -51,6 +50,6 @@ export default {
     return {
       active: false
     }
-  },
+  }
 };
 </script>
