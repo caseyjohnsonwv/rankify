@@ -55,3 +55,27 @@ def importMedia(token:dict, type:str, query:str):
         return {'artist':artist, 'album':album_name, 'tracks':track_data, 'image_url':image_url}
     else:
         raise HTTPException(status_code=403, detail=f"Must import by album or track - you tried {type}")
+
+@router.post('/spotify/export')
+def exportMedia(token:dict, name:str, song_list:list):
+    try:
+        client = tk.Spotify(build_token(token))
+    except Exception:
+        raise HTTPException(status_code=401, detail="Not authorized")
+    try:
+        assert len(song_list) > 0
+    except AssertionError:
+        raise HTTPException(status_code=403, detail="Refused to create empty playlist")
+    user = client.current_user()
+    playlist = client.playlist_create(
+        user_id=user.id,
+        name=name,
+        public=True,
+        description="Made with Rankify - the easiest way to rank music!"
+    )
+    client.playlist_add(playlist_id=playlist.id, uris=song_list)
+    try:
+        playlist_url = playlist.external_urls['spotify']
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Playlist URL not found")
+    return {'playlist_url':playlist_url}

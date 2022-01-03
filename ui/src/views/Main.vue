@@ -1,7 +1,8 @@
 <template>
   <div class="Main">
     <h1>This is the Rankify UI itself!</h1>
-    <button v-on:click="test">Load Test Data</button>
+    <button v-on:click="import_media">Load Test Data</button>
+    <button v-on:click="export_playlist">Export Rankings</button>
     <div class="container">
       <div class="row">
         <div class="col">
@@ -90,7 +91,7 @@ export default {
         }
       }
     },
-    test: async function() {
+    import_media: async function() {
       let token = JSON.parse(this.$cookie.get('spotify_token'));
       let query = 'Tyler Childers';
       let type = 'album';
@@ -119,6 +120,23 @@ export default {
           this.$cookie.delete('spotify_token');
           this.$router.push({name: 'Landing'});
         }
+      });
+    },
+    export_playlist: async function() {
+      let token = JSON.parse(this.$cookie.get('spotify_token'));
+      let name = "Rankify Export";
+      let song_list = [];
+      this.ranked_songs.forEach((song) => {
+        song_list.push(song.uri);
+      });
+      const path = encodeURI(`${process.env.VUE_APP_API_URL}/spotify/export?name=${name}`);
+      await axios.post(path, {token, song_list})
+      .then((res) => {
+        console.log(res);
+        alert(res.data.playlist_url);
+      })
+      .catch((err) => {
+        console.error(err);
       });
     }
   },
